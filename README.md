@@ -20,7 +20,7 @@ Design a form in a visual designer inside SAP GUI, bind it to ABAP data with sim
 
 ## Requirements
 
-- SAP NetWeaver ABAP 7.40 SP08 or higher, or SAP S/4HANA (developed and tested on S/4HANA 2025).
+- SAP NetWeaver ABAP 7.40 SP08 or higher, or SAP S/4HANA. Developed and tested on the SAP ABAP Cloud Developer Trial 2025 (A4H), using classic ABAP.
 - SAP GUI for Windows for the designer. The Edge (WebView2) browser control is recommended.
 - Classic ABAP (on-premise). An ABAP Cloud edition is planned in a separate repository.
 
