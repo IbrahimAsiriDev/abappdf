@@ -17,6 +17,12 @@
     </item>
     <item>
      <ID>S</ID>
+     <KEY>P_AR</KEY>
+     <ENTRY>Arabic</ENTRY>
+     <LENGTH>14</LENGTH>
+    </item>
+    <item>
+     <ID>S</ID>
      <KEY>P_CARR</KEY>
      <ENTRY>Airline</ENTRY>
      <LENGTH>15</LENGTH>
@@ -35,9 +41,15 @@
     </item>
     <item>
      <ID>S</ID>
+     <KEY>P_EN</KEY>
+     <ENTRY>English</ENTRY>
+     <LENGTH>15</LENGTH>
+    </item>
+    <item>
+     <ID>S</ID>
      <KEY>P_FORM</KEY>
-     <ENTRY>Designer form</ENTRY>
-     <LENGTH>21</LENGTH>
+     <ENTRY>Other form (optional)</ENTRY>
+     <LENGTH>29</LENGTH>
     </item>
     <item>
      <ID>S</ID>

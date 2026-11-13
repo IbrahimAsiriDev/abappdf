@@ -4,10 +4,12 @@ REPORT zabappdf_demo_flights.
 * Reads the SAP flight model (SCARR, SPFLI, SFLIGHT, SBOOK), renders the manifest
 * with ZCL_PDF_API (native engine), then downloads it and/or sends it as an
 * e-mail attachment.
-* P_FORM: designer form to use. ZPDF_FLIGHT_MANIFEST is installed by the first
-*         start of ZABAPPDF_STANDALONE on an empty form store; it can also be
-*         imported in the designer from forms/ZPDF_FLIGHT_MANIFEST.xml.
-*         Empty, or a form that does not exist = the template built into this report.
+* Language: English prints form ZPDF_FLIGHT_MANIFEST, Arabic prints the right-to-left
+*         form ZPDF_FLIGHT_MANIFEST_AR with Arabic class and currency names.
+*         Both forms are installed by the first start of ZABAPPDF_STANDALONE on an empty
+*         form store; they can also be imported in the designer from forms/*.xml.
+* P_FORM: another designer form (optional). A form that does not exist falls back to
+*         the English template built into this report.
 * Tags: {{CARRIER_ID}} {{CARRIER_NAME}} {{CONNID}} {{CITYFROM}} {{CITYTO}} {{AIRPFROM}}
 *       {{AIRPTO}} {{FLIGHT_DATE}} {{DEPTIME}} {{ARRTIME}} {{PLANETYPE}} {{SEATS}}
 *       {{PRICE}} {{CURRENCY}} {{PRINTED_AT}} {{SOURCE}}
@@ -21,7 +23,9 @@ PARAMETERS p_carr TYPE s_carr_id DEFAULT 'LH' OBLIGATORY.
 PARAMETERS p_conn TYPE s_conn_id.
 PARAMETERS p_max TYPE i DEFAULT 40.
 SELECTION-SCREEN SKIP.
-PARAMETERS p_form TYPE c LENGTH 30 DEFAULT 'ZPDF_FLIGHT_MANIFEST'.
+PARAMETERS p_en RADIOBUTTON GROUP lang DEFAULT 'X'.
+PARAMETERS p_ar RADIOBUTTON GROUP lang.
+PARAMETERS p_form TYPE c LENGTH 30.
 SELECTION-SCREEN SKIP.
 PARAMETERS p_down AS CHECKBOX DEFAULT 'X'.
 PARAMETERS p_mail AS CHECKBOX.
@@ -64,12 +68,16 @@ CLASS lcl_demo DEFINITION FINAL.
 
   PRIVATE SECTION.
     DATA ms_doc TYPE ty_doc.
+    DATA mv_arabic TYPE abap_bool.
 
     METHODS read_flight
       RETURNING VALUE(rv_found) TYPE abap_bool.
     METHODS sample_flight.
     METHODS class_text
       IMPORTING iv_class       TYPE s_class
+      RETURNING VALUE(rv_text) TYPE string.
+    METHODS currency_text
+      IMPORTING iv_currency    TYPE csequence
       RETURNING VALUE(rv_text) TYPE string.
     METHODS template
       RETURNING VALUE(rv_html) TYPE string.
@@ -90,6 +98,7 @@ CLASS lcl_demo IMPLEMENTATION.
     DATA ls_page TYPE zcl_pdf_renderer=>ty_page.
     DATA lv_pdf TYPE xstring.
 
+    mv_arabic = p_ar.
     IF read_flight( ) = abap_false.
       sample_flight( ).
       WRITE: / 'Note      : no booked flight found for', p_carr, '- sample data is printed.',
@@ -105,11 +114,14 @@ CLASS lcl_demo IMPLEMENTATION.
     ls_page-margin_left = 12.
 
     DATA(lv_form) = CONV string( p_form ).
+    IF lv_form IS INITIAL.
+      lv_form = COND #( WHEN mv_arabic = abap_true THEN `ZPDF_FLIGHT_MANIFEST_AR` ELSE `ZPDF_FLIGHT_MANIFEST` ).
+    ENDIF.
     IF lv_form IS NOT INITIAL.
       TRY.
           zcl_pdf_form_manager=>read_form( lv_form ).
         CATCH zcx_pdf.
-          WRITE: / 'Note      : form', p_form, 'not found; the built-in template is used.',
+          WRITE: / 'Note      : form', lv_form, 'not found; the built-in English template is used.',
                  / '            Start ZABAPPDF_STANDALONE once, or import the form XML.'.
           CLEAR lv_form.
       ENDTRY.
@@ -121,7 +133,7 @@ CLASS lcl_demo IMPLEMENTATION.
           lv_pdf = zcl_pdf_api=>render_pdf(
             iv_form_id = lv_form
             is_data    = ms_doc ).
-          WRITE: / 'Template  : form', p_form.
+          WRITE: / 'Template  : form', lv_form.
         ELSE.
           lv_pdf = zcl_pdf_api=>render_html(
             iv_html   = template( )
@@ -222,7 +234,7 @@ CLASS lcl_demo IMPLEMENTATION.
     ms_doc-planetype = ls_flight-planetype.
     ms_doc-seats = |{ ls_flight-seatsocc } / { ls_flight-seatsmax }|.
     ms_doc-price = |{ ls_flight-price DECIMALS = 2 }|.
-    ms_doc-currency = ls_flight-currency.
+    ms_doc-currency = currency_text( ls_flight-currency ).
     ms_doc-source = 'SFLIGHT / SBOOK'.
 
     LOOP AT lt_book INTO DATA(ls_book).
@@ -232,7 +244,7 @@ CLASS lcl_demo IMPLEMENTATION.
         passname   = ls_book-passname
         class      = class_text( ls_book-class )
         amount     = |{ ls_book-loccuram DECIMALS = 2 }|
-        currency   = ls_book-loccurkey
+        currency   = currency_text( ls_book-loccurkey )
         order_date = |{ ls_book-order_date DATE = USER }| ) TO ms_doc-bookings.
     ENDLOOP.
 
@@ -246,25 +258,45 @@ CLASS lcl_demo IMPLEMENTATION.
     DATA lv_name TYPE string.
     DATA lv_date TYPE d.
 
-    ms_doc = VALUE #(
-      carrier_id   = p_carr
-      carrier_name = 'Lufthansa'
-      connid       = '400'
-      cityfrom     = 'FRANKFURT'
-      cityto       = 'NEW YORK'
-      airpfrom     = 'FRA'
-      airpto       = 'JFK'
-      flight_date  = |{ sy-datum DATE = USER }|
-      deptime      = '10:10'
-      arrtime      = '11:34'
-      planetype    = 'A340-600'
-      seats        = '18 / 330'
-      price        = '666.00'
-      currency     = 'EUR'
-      source       = 'Sample data (flight tables are empty)' ).
-
-    lt_names = VALUE #( ( `Anna Schmidt` ) ( `Omar Al-Harbi` ) ( `John Miller` ) ( `Sara Al-Qahtani` )
-                        ( `Lukas Weber` ) ( `Fatimah Al-Zahrani` ) ( `Emma Johnson` ) ( `Khalid Al-Otaibi` ) ).
+    IF mv_arabic = abap_true.
+      ms_doc = VALUE #(
+        carrier_id   = 'SV'
+        carrier_name = 'الخطوط السعودية'
+        connid       = '1020'
+        cityfrom     = 'الرياض'
+        cityto       = 'جدة'
+        airpfrom     = 'RUH'
+        airpto       = 'JED'
+        flight_date  = |{ sy-datum DATE = USER }|
+        deptime      = '08:30'
+        arrtime      = '10:15'
+        planetype    = 'A320'
+        seats        = '18 / 186'
+        price        = '450.00'
+        currency     = currency_text( 'SAR' )
+        source       = 'بيانات تجريبية (جداول الرحلات فارغة)' ).
+      lt_names = VALUE #( ( `ناصر علي` ) ( `سارة أحمد` ) ( `فهد محمد` ) ( `نورة صالح` )
+                          ( `خالد عبدالله` ) ( `ريم سعد` ) ( `عبدالرحمن فيصل` ) ( `هند ماجد` ) ).
+    ELSE.
+      ms_doc = VALUE #(
+        carrier_id   = p_carr
+        carrier_name = 'Lufthansa'
+        connid       = '400'
+        cityfrom     = 'FRANKFURT'
+        cityto       = 'NEW YORK'
+        airpfrom     = 'FRA'
+        airpto       = 'JFK'
+        flight_date  = |{ sy-datum DATE = USER }|
+        deptime      = '10:10'
+        arrtime      = '11:34'
+        planetype    = 'A340-600'
+        seats        = '18 / 330'
+        price        = '666.00'
+        currency     = 'EUR'
+        source       = 'Sample data (flight tables are empty)' ).
+      lt_names = VALUE #( ( `Anna Schmidt` ) ( `Nasser Ali` ) ( `John Miller` ) ( `Sara Ahmed` )
+                          ( `Lukas Weber` ) ( `Fahd Mohammed` ) ( `Emma Johnson` ) ( `Noura Saleh` ) ).
+    ENDIF.
     DO nmin( val1 = p_max val2 = 18 ) TIMES.
       lv_index = sy-index.
       READ TABLE lt_names INTO lv_name INDEX ( lv_index - 1 ) MOD lines( lt_names ) + 1.
@@ -276,7 +308,7 @@ CLASS lcl_demo IMPLEMENTATION.
         passname   = lv_name
         class      = class_text( SWITCH s_class( lv_index MOD 6 WHEN 0 THEN 'F' WHEN 1 OR 2 THEN 'C' ELSE 'Y' ) )
         amount     = |{ lv_amount DECIMALS = 2 }|
-        currency   = 'EUR'
+        currency   = ms_doc-currency
         order_date = |{ lv_date DATE = USER }| ) TO ms_doc-bookings.
     ENDDO.
   ENDMETHOD.
@@ -284,11 +316,31 @@ CLASS lcl_demo IMPLEMENTATION.
   METHOD class_text.
     CASE iv_class.
       WHEN 'F'.
-        rv_text = 'First'.
+        rv_text = COND #( WHEN mv_arabic = abap_true THEN `أولى` ELSE `First` ).
       WHEN 'C'.
-        rv_text = 'Business'.
+        rv_text = COND #( WHEN mv_arabic = abap_true THEN `أعمال` ELSE `Business` ).
       WHEN OTHERS.
-        rv_text = 'Economy'.
+        rv_text = COND #( WHEN mv_arabic = abap_true THEN `سياحية` ELSE `Economy` ).
+    ENDCASE.
+  ENDMETHOD.
+
+  METHOD currency_text.
+    "The Arabic form shows common currencies by name; other codes stay as they are.
+    rv_text = iv_currency.
+    IF mv_arabic = abap_false.
+      RETURN.
+    ENDIF.
+    CASE iv_currency.
+      WHEN 'SAR'.
+        rv_text = `ريال`.
+      WHEN 'EUR'.
+        rv_text = `يورو`.
+      WHEN 'USD'.
+        rv_text = `دولار`.
+      WHEN 'GBP'.
+        rv_text = `جنيه إسترليني`.
+      WHEN 'JPY'.
+        rv_text = `ين`.
     ENDCASE.
   ENDMETHOD.
 

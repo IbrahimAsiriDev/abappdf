@@ -4,23 +4,34 @@ PDF form designer and native PDF renderer for SAP, written in pure ABAP.
 
 Design a form in a visual designer inside SAP GUI, bind it to ABAP data with simple `{{FIELD}}` tags, and get a PDF from one method call. No Adobe Document Services, no Smart Forms, no external service. Arabic text is shaped and printed right to left.
 
-**Home screen (form list):** all forms of the client, with edit, open, transport and delete.
-
-![Home screen](docs/form-list.png)
-
 ![abapPDF Designer](docs/designer.png)
 
 ## Features
 
 - **Visual designer** in SAP GUI: text, data fields, tables with repeating headers and totals, images, lines, shapes, check boxes, QR codes and Code 128 barcodes. Undo/redo, multi-select, alignment, local preview.
 - **Native PDF engine** in ABAP: page sizes A3, A4, A5, Letter and Legal, portrait or landscape, page headers and footers with page numbers, tables that continue over several pages.
-- **Arabic support**: letter shaping (joined forms, lam-alef), right-to-left ordering and an embedded subset of Noto Sans Arabic.
+- **Arabic support**: letter shaping (joined forms, lam-alef), right-to-left pages and tables, mixed Arabic and Latin text, and an embedded subset of Noto Sans Arabic. An Arabic demo form is included.
 - **Template binding**: fields, loops, conditions, totals and number/date formats (see below).
 - **Transportable forms**: forms are stored in table `ZPDF_FORMDB` and can be added to a transport request from the designer.
 - **Safe output**: `{{FIELD}}` is HTML-escaped; `{{{FIELD}}}` keeps only an allow-list of formatting tags.
 - **Optional Gotenberg** engine (Chromium) for full HTML/CSS, reached only through an SM59 destination.
 
-![Generated PDF](docs/manifest.png)
+## Screenshots
+
+**Home screen (form list):** all forms of the client, with edit, open, transport and delete.
+
+![Home screen](docs/home-screen.png)
+
+**New form:** create a form with a name, a package and an optional DDIC structure that fills the field list.
+
+![New form](docs/new-form.png)
+
+**Output:** the demo forms in English and Arabic, rendered by the native engine.
+
+<p>
+  <img src="docs/manifest.png" alt="English passenger manifest" width="49%">
+  <img src="docs/manifest-ar.png" alt="Arabic passenger list" width="49%">
+</p>
 
 ## Requirements
 
@@ -43,9 +54,14 @@ Without table `ZPDF_FORMDB` the forms are stored in `INDX(ZP)` (not transportabl
 
 ## Getting started
 
-1. Run **`ZABAPPDF_STANDALONE`**. On the first start in a client without forms, the demo form `ZPDF_FLIGHT_MANIFEST` is installed.
-2. Open the form with **Edit**, change it, and use **Render PDF** to see the result.
-3. Run **`ZABAPPDF_DEMO_FLIGHTS`** to print the manifest with data from the flight model (`SFLIGHT`, `SBOOK`), download it and optionally send it by e-mail. If the flight tables are empty, run `SAPBC_DATA_GENERATOR` first; until then the demo prints sample data.
+1. Run **`ZABAPPDF_STANDALONE`**. On the first start in a client without forms, two demo forms are installed:
+   `ZPDF_FLIGHT_MANIFEST` (English) and `ZPDF_FLIGHT_MANIFEST_AR` (Arabic, right to left).
+2. Open a form with **Edit**, change it, and use **Render PDF** to see the result.
+3. Run **`ZABAPPDF_DEMO_FLIGHTS`** and choose the language (English or Arabic) to print the passenger list with data
+   from the flight model (`SFLIGHT`, `SBOOK`), download it and optionally send it by e-mail.
+   If the flight tables are empty, run `SAPBC_DATA_GENERATOR` first; until then the demo prints sample data.
+
+The demo forms are also in the [forms](forms) folder; use **Import XML** in the designer to load them again.
 
 ## Use it in your code
 
@@ -131,7 +147,7 @@ The tool checks authorization object `S_PROGRAM` with activity `SUBMIT` and thes
 | Object | Purpose |
 |---|---|
 | `ZABAPPDF_STANDALONE` | Designer (also usable as a one-program install) |
-| `ZABAPPDF_DEMO_FLIGHTS` | Demo: flight passenger manifest, download and e-mail |
+| `ZABAPPDF_DEMO_FLIGHTS` | Demo: passenger list in English or Arabic, download and e-mail |
 | `ZCL_PDF_API` | Entry point: `render_pdf`, `render_html`, `download_pdf` |
 | `ZCL_PDF_DATA_BINDER` | Fills the template tags from ABAP data |
 | `ZCL_PDF_RENDERER` | Chooses the engine (native or Gotenberg) |
