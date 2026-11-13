@@ -1,0 +1,63 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_PROG" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <PROGDIR>
+    <NAME>ZABAPPDF_DEMO_FLIGHTS</NAME>
+    <SUBC>1</SUBC>
+    <RLOAD>E</RLOAD>
+    <FIXPT>X</FIXPT>
+    <UCCHECK>X</UCCHECK>
+   </PROGDIR>
+   <TPOOL>
+    <item>
+     <ID>R</ID>
+     <ENTRY>abapPDF Demo - Flight Passenger Manifest</ENTRY>
+     <LENGTH>40</LENGTH>
+    </item>
+    <item>
+     <ID>S</ID>
+     <KEY>P_CARR</KEY>
+     <ENTRY>Airline</ENTRY>
+     <LENGTH>15</LENGTH>
+    </item>
+    <item>
+     <ID>S</ID>
+     <KEY>P_CONN</KEY>
+     <ENTRY>Flight number</ENTRY>
+     <LENGTH>21</LENGTH>
+    </item>
+    <item>
+     <ID>S</ID>
+     <KEY>P_DOWN</KEY>
+     <ENTRY>Download PDF</ENTRY>
+     <LENGTH>20</LENGTH>
+    </item>
+    <item>
+     <ID>S</ID>
+     <KEY>P_FORM</KEY>
+     <ENTRY>Designer form</ENTRY>
+     <LENGTH>21</LENGTH>
+    </item>
+    <item>
+     <ID>S</ID>
+     <KEY>P_MAIL</KEY>
+     <ENTRY>Send e-mail</ENTRY>
+     <LENGTH>19</LENGTH>
+    </item>
+    <item>
+     <ID>S</ID>
+     <KEY>P_MAX</KEY>
+     <ENTRY>Max. passengers</ENTRY>
+     <LENGTH>23</LENGTH>
+    </item>
+    <item>
+     <ID>S</ID>
+     <KEY>P_TO</KEY>
+     <ENTRY>E-mail address</ENTRY>
+     <LENGTH>22</LENGTH>
+    </item>
+   </TPOOL>
+  </asx:values>
+ </asx:abap>
+</abapGit>
