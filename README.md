@@ -165,4 +165,8 @@ The native engine is the default. To use [Gotenberg](https://gotenberg.dev) inst
 
 ## License
 
-[MIT](LICENSE). The embedded Noto Sans Arabic font subset is licensed under the [SIL Open Font License 1.1](OFL.txt).
+[MIT](LICENSE).
+
+## Credits
+
+Arabic text is printed with a subset of [Noto Sans Arabic](https://github.com/notofonts/arabic) by the Noto Project Authors, licensed under the [SIL Open Font License 1.1](OFL.txt).
